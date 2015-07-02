@@ -8,6 +8,6 @@ Authors@R: c(
 Description: Vignettes and data to support 2015 Uruguay R Bio course
     'Untangling Genomes'.
 Imports: BiocInstaller
-Suggests: BiocStyle, knitr
+Suggests: BiocStyle, knitr, airway, DESeq2, ggplot2
 License: Artistic-2.0
 VignetteBuilder: knitr
