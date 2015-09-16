@@ -1,5 +1,8 @@
 ---
 title: "6. RNA-Seq Differential Expression"
+author: "Martin Morgan (martin.morgan@roswellpark.org)<br />
+    Roswell Park Cancer Institute, Buffalo, NY<br />
+    5 - 9 October, 2015"
 output:
   BiocStyle::html_document:
     toc: true
@@ -18,12 +21,11 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, echo=FALSE, messages=FALSE, warnings=FALSE}
-suppressPackageStartupMessages({})
+suppressPackageStartupMessages({
+    library(DESeq2)
+    library(limma)
+})
 ```
-
-Author: Martin Morgan (<a
-  href="mailto:mtmorgan@fredhutch.org">mtmorgan@fredhutch.org</a>)<br/ >
-Date: 5-9 October, 2015<br />
 
 The material in this course requires R version 3.2 and Bioconductor
 version 3.1

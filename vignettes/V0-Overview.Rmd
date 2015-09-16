@@ -1,0 +1,43 @@
+---
+title: "Overview"
+author: "Martin Morgan (martin.morgan@roswellpark.org)<br />
+    Roswell Park Cancer Institute, Buffalo, NY<br />
+    5 - 9 October, 2015"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  % \VignetteIndexEntry{Overview}
+  % \VignetteEngine{knitr::rmarkdown}
+---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+options(width=100, max.print=1000)
+knitr::opts_chunk$set(
+    eval=as.logical(Sys.getenv("KNITR_EVAL", "TRUE")),
+    cache=as.logical(Sys.getenv("KNITR_CACHE", "TRUE")))
+```
+
+The material in my parts of the course requires _R_ version 3.2 and
+_Bioconductor_ version 3.1
+
+```{r configure-test}
+stopifnot(
+    getRversion() >= '3.2' && getRversion() < '3.3',
+    BiocInstaller::biocVersion() == "3.1"
+)
+```
+
+1. [Introduction to R / Bioconductor](V1-Introduction.html) (T)
+2. [Working with Data: `eSet` and `SummarizedExperiment`](V2-WorkingWithData.html) (P)
+3. [Genomic Ranges For Genome-Scale Data And Annotation](V3-GenomicRanges.html) (P)
+4. [Adding Annotation To Your Analysis](V4-Annotation.html) (P)
+5. [Counting Reads And Working With Large Files](V5-LargeFiles.html) (P)
+6. [RNA-Seq Differential Expression](V6-RNASeq.html) (P)
+7. [ChIP-Seq For Understanding Gene Regulation](V7-ChIPSeq.html) (P)
+8. [Motifs](V8-Motifs.html) (P)
+9. [Visualizing Genomic Data](V9-Visualization.html) (P)
+
+(T): Talk; (P): Practical.

@@ -1,13 +1,22 @@
 Package: BiocUruguay2015
 Type: Package
-Title: R / Bioconductor Training Material for Uruguay R Bio Course
+Title: Training Material for Uruguay R / Bioconductor Course
 Version: 0.0.1
 Authors@R: c(
     person("Martin", "Morgan", role="cre",
-        email="mtmorgan@fredhutch.org"))
-Description: Vignettes and data to support 2015 Uruguay R Bio course
-    'Untangling Genomes'.
+        email="martin.morgan@roswellpark.org"))
+Description: Vignettes and data to support 2015 Uruguay R /
+    Bioconductor course 'Untangling Genomes'.
 Imports: BiocInstaller
-Suggests: BiocStyle, knitr, airway, DESeq2, ggplot2
+Suggests: BiocStyle, knitr,
+    ALL, airway,
+    GenomicRanges, GenomicAlignments,
+    AnnotationDbi, AnnotationHub, GenomicFeatures, biomaRt,
+    org.Hs.eg.db, TxDb.Hsapiens.UCSC.hg19.knownGene,
+    GenomicFiles, BiocParallel,
+    DESeq2, limma,
+    csaw, ChIPseeker,
+    MotifDb,
+    Gviz, ggbio, shiny
 License: Artistic-2.0
 VignetteBuilder: knitr
