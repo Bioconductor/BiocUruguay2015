@@ -21,18 +21,18 @@ knitr::opts_chunk$set(
 ```
 
 The material in my parts of the course requires _R_ version 3.2 and
-_Bioconductor_ version 3.1
+_Bioconductor_ version 3.2
 
 ```{r configure-test}
 stopifnot(
     getRversion() >= '3.2' && getRversion() < '3.3',
-    BiocInstaller::biocVersion() == "3.1"
+    BiocInstaller::biocVersion() == "3.2"
 )
 ```
 
 1. [Introduction to R / Bioconductor](V1-Introduction.html) (T)
-2. [Working with Data: `eSet` and `SummarizedExperiment`](V2-WorkingWithData.html) (P)
-3. [Genomic Ranges For Genome-Scale Data And Annotation](V3-GenomicRanges.html) (P)
+2. [Working with Data: `SummarizedExperiment`](V2-WorkingWithData.html) (P)
+3. [Genomic Ranges and other Data Structures For Genome-Scale Data And Annotation](V3-GenomicRanges.html) (P)
 4. [Adding Annotation To Your Analysis](V4-Annotation.html) (P)
 5. [Counting Reads And Working With Large Files](V5-LargeFiles.html) (P)
 6. [RNA-Seq Differential Expression](V6-RNASeq.html) (P)

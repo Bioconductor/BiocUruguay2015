@@ -28,12 +28,12 @@ suppressPackageStartupMessages({
 ```
 
 The material in this course requires R version 3.2 and Bioconductor
-version 3.1
+version 3.2
 
 ```{r configure-test}
 stopifnot(
     getRversion() >= '3.2' && getRversion() < '3.3',
-    BiocInstaller::biocVersion() == "3.1"
+    BiocInstaller::biocVersion() == "3.2"
 )
 ```
 # Resources

@@ -1,5 +1,5 @@
 ---
-title: "2. Working With Data: `eSet` And `SummarizedExperiment`"
+title: "2. Working With Data: `SummarizedExperiment`"
 author: "Martin Morgan (martin.morgan@roswellpark.org)<br />
     Roswell Park Cancer Institute, Buffalo, NY<br />
     5 - 9 October, 2015"
@@ -8,7 +8,7 @@ output:
     toc: true
     toc_depth: 2
 vignette: >
-  % \VignetteIndexEntry{2. Working With Data: eSet And SummarizedExperiment}
+  % \VignetteIndexEntry{2. Working With Data: SummarizedExperiment}
   % \VignetteEngine{knitr::rmarkdown}
 ---
 
@@ -28,14 +28,148 @@ suppressPackageStartupMessages({
 ```
 
 The material in this course requires R version 3.2 and Bioconductor
-version 3.1
+version 3.2
 
 ```{r configure-test}
 stopifnot(
     getRversion() >= '3.2' && getRversion() < '3.3',
-    BiocInstaller::biocVersion() == "3.1"
+    BiocInstaller::biocVersion() == "3.2"
 )
 ```
+
+Your boss has been working on Acute Lymphocytic Lukemia (ALL) for many
+years. One data set consists of microarray gene expression values for
+12625 genes in 128 different samples. Your boss would like to analyze
+different subsets of the data, and has given you a couple of
+tab-delimited files. One file (_ALL-pData.tsv_) describes the samples,
+the other (_exprs.tsv_) contains pre-processed gene expression
+data. You are supposed to come up with a way to create the subsets
+your boss asks you for. You realize that you could read the data in to
+Excel and manipulate it there, but you're concerned about being able
+to do reproducible research and you're nervous about the bookkeeping
+errors that always seem to come up. So you think you'll give
+_Bioconductor_ a try...
+
+# Read the data in to _R_
+
+## Use `read.table()` to read _ALLphenoData.tsv_
+
+```{r read.table}
+fname = "ALLphenoData.tsv"   ## use file.choose() to find the file
+pdata = read.table(fname)
+```
+
+Check out the help page `?read.delim` for input options, and explore
+basic properties of the object you've created, for instance...
+
+```{r ALL-properties}
+class(pdata)
+colnames(pdata)
+dim(pdata)
+head(pdata)
+summary(pdata$sex)
+summary(pdata$cyto.normal)
+```
+
+Remind yourselves about various ways to subset and access columns of a
+data.frame
+
+```{r ALL-subset}
+pdata[1:5, 3:4]
+pdata[1:5, ]
+head(pdata[, 3:5])
+tail(pdata[, 3:5], 3)
+head(pdata$age)
+head(pdata$sex)
+head(pdata[pdata$age > 21,])
+```
+
+## Use `read.table()` to read the expression values
+
+```{r exprs}
+fname <- "ALLassay.tsv"
+exprs <- as.matrix(read.table(fname, check.names=FALSE))
+```
+
+Use `dim()` to figure out the number of rows and columns in the
+expression data. Use subscripts to look at the first few rows and
+columns `exprs[1:5, 1:5]`. What are the row names? Do the column names
+agree with the row names of the `pdata` object? What is the `range()`
+of the expression data? Can you create a histogram (hint: `hist()`) of
+the data? What is `plot(density(exprs))`? Can you use `plot()` and
+`lines()` to plot the density of each sample, in a single figure?
+
+# Make a _SummarizedExperiment_ object
+
+You could work with the matrix and data frame directly, but it is
+better to put these related parts of the data into a single object, a
+_SummarizedExperiment_.
+
+Load the appropriate _Bioconductor_ package
+
+```{r SummarizedExperiment}
+if (BiocInstaller::biocVersion() >= "3.2") {
+    library(SummarizedExperiment)
+} else {
+    library(GenomicRanges)
+}
+```
+
+and create a single _SummarizedExperiment_ object from the two parts
+of the data. Some _Bioconductor_ objects enhance the behavior of base
+_R_ objects; an example of this is `DataFrame()`
+
+```{r make-SE}
+se <- SummarizedExperiment(exprs, colData=DataFrame(pdata))
+```
+
+Explore the object, noting that you can retrieve the original
+elements, and can subset in a coordinated fashion.
+
+```{r se-ops}
+head(colData(se))
+assay(se)[1:5, 1:5]
+se$sex %in% "M"
+males <- se[,se$sex %in% "M"]
+males
+assay(males)[1:5, 1:5]
+```
+
+Use `vignette("SummarizedExperiment")` to read about other operations
+on _SummarizedExperiment_.
+
+# Show off your skills
+
+Quickly create the following subsets of data for your boss:
+
+1. All women in the study.
+
+2. All women over 40
+
+3. An object `bcrbal` containing individuals with `mol.biol` belonging
+   either to "BCR/ABL" or "NEG".
+
+Can you...?
+
+1. Create a new column that simplifies the `BT` column (which lists
+   different B- and T-cell subtypes) to contain just `B` or `T`, e.g.,
+   re-coding B, B1, B2, B3 and B4 to simply `B`, and likewise for `T`?
+
+2. Use `aggregate()` to calculate the average age of males and females
+   in the BCR/ABL and NEG treatment groups?
+
+3. Use `t.test()` to compare the age of individuals in the BCR/ABL
+   versus NEG groups; visualize the results using `boxplot()`. In both
+   cases, use the `formula` interface. Consult the help page `?t.test`
+   and re-do the test assuming that variance of ages in the two groups
+   is identical. What parts of the test output change?
+
+# Document your work
+
+Summarize the exercises above in a simple script. Can you figure out
+how to write a 'markdown' document that includes R code chunks, as
+well as text describing what you did, and figures and tables showing
+the results?
 
 # Resources
 

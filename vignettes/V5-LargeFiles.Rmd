@@ -28,17 +28,97 @@ suppressPackageStartupMessages({
 ```
 
 The material in this course requires R version 3.2 and Bioconductor
-version 3.1
+version 3.2
 
 ```{r configure-test}
 stopifnot(
     getRversion() >= '3.2' && getRversion() < '3.3',
-    BiocInstaller::biocVersion() == "3.1"
+    BiocInstaller::biocVersion() == "3.2"
 )
 ```
 
-# Resources
+# Large data -- `BiocParallel`, `GenomicFiles`
 
+## Restriction
+
+- Input only the data necessary, e.g., `ScanBamParam()`
+- `which`: genomic ranges of interest
+- `what`: 'columns' of BAM file, e.g., 'seq', 'flag'
+
+## Iteration
+
+- Read entire file, but in chunks
+- Chunk size small enough to fit easily in memory, 
+- Chunk size large enough to benefit from _R_'s vectorized operations
+  -- 10k to 1M records at at time
+- e.g., `BamFile(..., yieldSize=100000)`
+
+Iterative programming model
+
+- _yield_ a chunk of data
+- _map_ input data to convenient representation, often summarizing
+  input to simplified form
+    - E.g., Aligned read coordinates to counts overlapping regions of
+      interest
+    - E.g., Aligned read sequenced to GC content
+- _reduce_ across mapped chunks
+- Use `GenomicFiles::reduceByYield()`
+
+    ```{r iteration}
+    library(GenomicFiles)
+
+    yield <- function(bfl) {
+        ## input a chunk of alignments
+        library(GenomicAlignments)
+        readGAlignments(bfl, param=ScanBamParam(what="seq"))
+    }
+    
+    map <- function(aln) { 
+        ## Count G or C nucleotides per read
+        library(Biostrings)
+        gc <- letterFrequency(mcols(aln)$seq, "GC")
+        ## Summarize number of reads with 0, 1, ... G or C nucleotides
+        tabulate(1 + gc, 73)                # max. read length: 72
+    }
+    
+    reduce <- `+`
+    ```
+
+- Example
+
+    ```{r iteration-doit}
+    library(RNAseqData.HNRNPC.bam.chr14)
+    fls <- RNAseqData.HNRNPC.bam.chr14_BAMFILES
+    bf <- BamFile(fls[1], yieldSize=100000)
+    gc <- reduceByYield(bf, yield, map, reduce)
+    plot(gc, type="h",
+         xlab="GC Content per Aligned Read", ylab="Number of Reads")
+    ```
+
+## Parallel evaluation
+
+- Cores, computers, clusters, clouds
+- Generally, requires memory management techniques like restriction or
+  iteration -- parallel processes competing for shared memory
+- Many problems are _embarassingly parallel_ -- `lapply()`-like --
+  especially in bioinformatics where parallel evaluation is across
+  files
+
+- Example: GC content in several BAM files
+
+    ```{r parallel-doit}
+    library(BiocParallel)
+    gc <- bplapply(BamFileList(fls), reduceByYield, yield, map, reduce)
+
+    library(ggplot2)
+    df <- stack(as.data.frame(lapply(gc, cumsum)))
+    df$GC <- 0:72
+    ggplot(df, aes(x=GC, y=values)) + geom_line(aes(colour=ind)) +
+        xlab("Number of GC Nucleotides per Read") +
+        ylab("Number of Reads")
+    ```
+
+# Resources
 Acknowledgements
 
 - Core (Seattle): Sonali Arora, Marc Carlson, Nate Hayden, Jim Hester,

@@ -32,13 +32,209 @@ suppressPackageStartupMessages({
 ```
 
 The material in this course requires R version 3.2 and Bioconductor
-version 3.1
+version 3.2
 
 ```{r configure-test}
 stopifnot(
     getRversion() >= '3.2' && getRversion() < '3.3',
-    BiocInstaller::biocVersion() == "3.1"
+    BiocInstaller::biocVersion() == "3.2"
 )
+```
+
+# Annotation
+
+## Model organisms
+
+### Gene model annotation resources -- `TxDb` packages
+
+e.g., `{r Biocpkg("TxDb.Hsapiens.UCSC.hg19.knownGene")}
+
+```{r gene-model-discovery}
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+txdb <- TxDb.Hsapiens.UCSC.hg19.knownGene
+txdb
+methods(class=class(txdb))
+```
+
+`TxDb` objects
+
+- Curatated annotation resources -- http://bioconductor.org/packages/biocViews
+- Underlying sqlite database -- `dbfile(txdb)`
+- Make your own: `GenomicFeatures::makeTxDbFrom*()`
+
+Accessing gene models
+
+- `exons()`, `transcripts()`, `genes()`, `cds()` (coding sequence)
+- `promoters()` & friends
+- `exonsBy()` & friends -- exons by gene, transcript, ...
+- 'select' interface: `keytypes()`, `columns()`, `keys()`, `select()`,
+  `mapIds()`
+
+```{r txdb-exons}
+exons(txdb)
+exonsBy(txdb, "tx")
+```
+
+
+### Whole-genome sequence -- `BSgenome` packages
+
+e.g., `{r Biocpkg("BSgenome.Hsapiens.UCSC.hg19")}
+
+```{r bsgenome}
+library(BSgenome.Hsapiens.UCSC.hg19)
+genome <- BSgenome.Hsapiens.UCSC.hg19
+getSeq(genome, exons(txdb)[1:100])
+```
+
+### Identifier mapping -- `OrgDb`
+
+```{r org}
+library(org.Hs.eg.db)
+org.Hs.eg.db
+```
+
+`OrgDb` objects
+
+- Curated resources, underlying sqlite data base, like `TxDb`
+- make your own: [AnnotationForge][] (but see the AnnotationHub,
+  below!)
+- 'select' interface: `keytypes()`, `columns()`, `keys()`, `select()`,
+  `mapIds()`
+
+`select()`
+
+- Vector of keys, desired columns
+- Specification of key type
+
+    ```{r select}
+    select(org.Hs.eg.db, c("BRCA1", "PTEN"), c("ENTREZID", "GENENAME"), "SYMBOL")
+    keytypes(org.Hs.eg.db)
+    columns(org.Hs.eg.db)
+    ```
+
+Related functionality 
+
+- `mapIds()` -- special case for mapping from 1 identifier to another
+- `OrganismDb` objects: combined `org.*`, `TxDb.*`, and other
+  annotation resources for easy access
+
+    ```{r organismdb}
+    library(Homo.sapiens)
+    select(Homo.sapiens, c("BRCA1", "PTEN"), 
+           c("TXNAME", "TXCHROM", "TXSTART", "TXEND"), 
+           "SYMBOL")
+    ```
+    
+## Other annotation resources -- `biomaRt`, `AnnotationHub`
+
+### _biomaRt_ & friends
+
+http://biomart.org; _Bioconductor_ package [biomaRt][]
+
+```{r biomart, eval=FALSE}
+## NEEDS INTERNET ACCESS !!
+library(biomaRt)
+head(listMarts(), 3)                      ## list marts
+head(listDatasets(useMart("ensembl")), 3) ## mart datasets
+ensembl <-                                ## fully specified mart
+    useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+
+head(listFilters(ensembl), 3)             ## filters
+myFilter <- "chromosome_name"
+substr(filterOptions(myFilter, ensembl), 1, 50) ## return values
+myValues <- c("21", "22")
+head(listAttributes(ensembl), 3)          ## attributes
+myAttributes <- c("ensembl_gene_id","chromosome_name")
+
+## assemble and query the mart
+res <- getBM(attributes =  myAttributes, filters =  myFilter,
+             values =  myValues, mart = ensembl)
+```
+
+Other internet resources
+
+- [biomaRt](http://biomart.org)                       Ensembl and other annotations
+- [PSICQUIC](https://code.google.com/p/psicquic)      Protein interactions
+- [uniprot.ws](http://uniprot.org)                    Protein annotations
+- [KEGGREST](http://www.genome.jp/kegg)               KEGG pathways
+- [SRAdb](http://www.ncbi.nlm.nih.gov/sra)            Sequencing experiments
+- [rtracklayer](http://genome.ucsc.edu)               USCS genome tracks
+- [GEOquery](http://www.ncbi.nlm.nih.gov/geo/)        Array and other data
+- [ArrayExpress](http://www.ebi.ac.uk/arrayexpress/)  Array and other data
+- ...
+
+### _AnnotationHub_
+
+- _Bioconductor_ package [AnnotationHub][]
+- Meant to ease use of 'consortium' and other genome-scale resources
+- Simplify discovery, retrieval, local management, and import to
+  standard _Bioconductor_ representations
+
+Example: Ensembl 'GTF' files to _R_ / _Bioconductor_ GRanges and TxDb
+
+```{r annotationhub-gtf, eval=FALSE}
+library(AnnotationHub)
+hub <- AnnotationHub()
+hub
+query(hub, c("Ensembl", "80", "gtf"))
+## ensgtf = display(hub)                   # visual choice
+hub["AH47107"]
+gtf <- hub[["AH47107"]]
+gtf
+txdb <- GenomicFeatures::makeTxDbFromGRanges(gtf)
+```
+
+Example: non-model organism `OrgDb` packages
+
+```{r annotationhub-orgdb, eval=FALSE}
+library(AnnotationHub)
+hub <- AnnotationHub()
+query(hub, "OrgDb")
+```
+
+Example: Map Roadmap epigenomic marks to hg38
+
+- Roadmap BED file as _GRanges_
+
+    ```{r annotationhub-roadmap, eval=FALSE}
+    library(AnnotationHub)
+    hub <- AnnotationHub()
+    query(hub , c("EpigenomeRoadMap", "E126", "H3K4ME2"))
+    E126 <- hub[["AH29817"]]
+    ```
+
+- UCSC 'liftOver' file to map coordinates
+
+    ```{r annotationhub-liftover, eval=FALSE}
+    query(hub , c("hg19", "hg38", "chainfile"))
+    chain <- hub[["AH14150"]]
+    ```
+
+- lift over -- possibly one-to-many mapping, so _GRanges_ to _GRangesList_
+
+    ```{r liftover, eval=FALSE}
+    library(rtracklayer)
+    E126hg38 <- liftOver(E126, chain)
+    E126hg38
+    ```
+
+# Annotating Variants
+
+Example: read variants from a VCF file, and annotate with respect to a
+known gene model
+  
+```{r vcf, message=FALSE}
+## input variants
+library(VariantAnnotation)
+fl <- system.file("extdata", "chr22.vcf.gz", package="VariantAnnotation")
+vcf <- readVcf(fl, "hg19")
+seqlevels(vcf) <- "chr22"
+## known gene model
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+coding <- locateVariants(rowRanges(vcf),
+    TxDb.Hsapiens.UCSC.hg19.knownGene,
+    CodingVariants())
+head(coding)
 ```
 
 # Resources
@@ -63,3 +259,10 @@ Acknowledgements
 ```{r sessionInfo}
 sessionInfo()
 ```
+
+[AnnotationHub]: http://bioconductor.org/packages/AnnotationHub
+[TxDb.Hsapiens.UCSC.hg19.knownGene]: http://bioconductor.org/packages/TxDb.Hsapiens.UCSC.hg19.knownGene
+[ChIPseeker]: http://bioconductor.org/packages/ChIPseeker
+[VariantFiltering]: http://bioconductor.org/packages/VariantFiltering
+[AnnotationForge]: http://bioconductor.org/packages/AnnotationForge
+[biomaRt]: http://bioconductor.org/packages/biomaRt

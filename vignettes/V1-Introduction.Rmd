@@ -30,12 +30,12 @@ suppressPackageStartupMessages({
 ```
 
 The material in this course requires R version 3.2 and Bioconductor
-version 3.1
+version 3.2
 
 ```{r configure-test}
 stopifnot(
     getRversion() >= '3.2' && getRversion() < '3.3',
-    BiocInstaller::biocVersion() == "3.1"
+    BiocInstaller::biocVersion() == "3.2"
 )
 ```
 
@@ -94,12 +94,9 @@ Lessons
 
 ### How to be reproducible?
 
-- Document our analysis in scripts and 'markdown' documents
 - Use software 'objects' that take care of some of the tedious
   book-keeping
-- Make use of names when referencing rows, columns, ...
-
-### Example: markdown
+- Document our analysis in scripts and 'markdown' documents
 
 ### Example: `SummarizedExperiment`
 
@@ -151,9 +148,9 @@ Inter-operability between packages
 
 Examples (details later)
 
-- `ExpressionSet`
-- `GenomicRanges`
 - `SummarizedExperiment`
+- `DNAStringSet`
+- `GenomicRanges`
 
 ## Comprehension is more than statistical analysis
 
