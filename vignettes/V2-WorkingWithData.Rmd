@@ -146,7 +146,7 @@ Quickly create the following subsets of data for your boss:
 
 2. All women over 40
 
-3. An object `bcrbal` containing individuals with `mol.biol` belonging
+3. An object `bcrabl` containing individuals with `mol.biol` belonging
    either to "BCR/ABL" or "NEG".
 
 Can you...?

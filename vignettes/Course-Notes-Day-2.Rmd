@@ -1,0 +1,129 @@
+---
+title: "Course Notes, Day 2"
+author: "Martin Morgan"
+date: "10/6/2015"
+output: html_document
+---
+
+[https://github.com/Bioconductor/BiocUruguay2015][]; click on 'vignettes' and 'V1-...'
+
+## Bioconductor
+
+Some introductory R and markdown. This is an example of reproducible research.
+
+```{r demo-section}
+x <- rnorm(1000)
+hist(x)
+```
+
+
+## SummarizedExperiment / eSet
+
+A real example of the importance of reproducible research (see notes).
+
+Our own data: import phenotypic data into R from a 'tab-separate
+value' file
+
+```{r import-phenodata}
+pdata = read.table("~/ALLphenoData.tsv")
+```
+
+Explore and manipulate (mostly for practice). Watch for `NA`
+values!
+
+```{r phenodata-explore}
+dim(pdata)
+pdata[1:5, 1:6]
+hist(pdata$age)
+pdata40plus = pdata[!is.na(pdata$age) & (pdata$age > 40),]
+```
+
+Read in the assay data, and coerce to a matrix
+
+```{r assay-data}
+assay = as.matrix(read.table("~/ALLassay.tsv", check.names=FALSE))
+```
+
+Make a summarized experiment
+
+```{r summarized-experiment}
+library(SummarizedExperiment)
+se = SummarizedExperiment(assay, colData=DataFrame(pdata))
+```
+
+Tasks:
+
+All women in the study.
+
+```{r females-in-study}
+females = se[ , se$sex %in% "F"]
+```
+
+All women over 40
+
+```{r females-over-fourty}
+over40 = !is.na(se$age) & se$age > 40
+fem = se$sex %in% "F"
+se[, over40 & fem]
+## females[ , !is.na(females$age) & females$age > 40]
+```
+
+An object `bcrabl` containing individuals with mol.biol belonging either to "BCR/ABL" or "NEG".
+
+```{r bcrabl}
+se[, se$mol.biol %in% c("BCR/ABL", "NEG")]
+```
+
+Bonus:
+
+Create a new column that simplifies the BT column (which lists different B- and T-cell subtypes) to contain just B or T, e.g., re-coding B, B1, B2, B3 and B4 to simply B, and likewise for T?
+
+```{r bt}
+```
+
+Use aggregate() to calculate the average age of males and females in the BCR/ABL and NEG treatment groups?
+
+```{r bcrabl-age}
+```
+
+Use t.test() to compare the age of individuals in the BCR/ABL versus NEG groups; visualize the results using boxplot(). In both cases, use the formula interface. Consult the help page ?t.test and re-do the test assuming that variance of ages in the two groups is identical. What parts of the test output change?
+
+```{r t.test}
+```
+
+## Genomic Ranges
+
+- [GenomicRanges][] package
+- Incredibly useful for describing 'annotation' and 'experimental' data
+- Algebra of ranges; intra-range (e.g., `shift()`), inter-range (e.g.,
+  `reduce()`); between-range (e.g., `findOverlaps(query, subject)`, 
+  `nearest()`.
+- `GRangesList` describes a simple hierarchy of genomic ranges (e.g.,
+  exons) grouped into e.g., genes, transcripts.
+
+## Annotation
+
+- 'TxDb' packages contain gene models; `exons()`, `exonsBy()`, 
+  `promoters()`. Return `GRanges` or `GRangesList`. E.g., 
+  [TxDb.Hsapiens.UCSC.hg19.knownGene][]
+- 'org' packages for mapping between different gene identifiers, e.g., 
+  ENTREZ, SYMBOL, GENENAME, UNIPROT... [org.Hs.eg.db][]
+- 'BSgenome' packages for whole-genome sequences, e.g., 
+  [BSgenome.Hsapiens.UCSC.hg19][]
+- [AnnotationHub][] for accessing web-based genome-scale data resources
+
+```{r annotation-resources}
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(BSgenome.Hsapiens.UCSC.hg19)
+promo = promoters(TxDb.Hsapiens.UCSC.hg19.knownGene)
+promoseq = getSeq(BSgenome.Hsapiens.UCSC.hg19, promo[1:200])
+names(promoseq) = promo$tx_name[1:100]
+promoseq
+hist(letterFrequency(promoseq, "GC", as.prob=TRUE))
+```
+  
+[GenomicRanges]: http://bioconductor.org/packages/GenomicRanges
+[org.Hs.eg.db]: http://bioconductor.org/packages/org.Hs.eg.db
+[AnnotationHub]: http://bioconductor.org/packages/AnnotationHub
+[TxDb.Hsapiens.UCSC.hg19.knownGene]: http://bioconductor.org/packages/TxDb.Hsapiens.UCSC.hg19.knownGene
+[BSgenome.Hsapiens.UCSC.hg19]: http://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19

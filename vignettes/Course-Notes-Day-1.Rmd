@@ -1,0 +1,195 @@
+---
+title: "Course Notes Day 1"
+author: "Martin Morgan"
+date: "10/5/2015"
+output: html_document
+---
+
+The following code chunks demonstrate basic R functionality. Some key points are:
+
+- R is _vectorized_. Vectorized versions of calculations are 'fast'.
+  (`sapply()` is actually iteration, not vectorization).
+- Functions can be invoked with named or unnamed arguments. Named
+  arguments are matched first. Unnamed arguments assigned left-to-right.
+- Arguments can have default values
+- Use `?rnorm` for help. Run help examples with `example(rnorm)`
+
+```{r vectors-and-functions}
+x = rnorm(1000)
+y = x + rnorm(1000, sd=.5)
+mean(x)
+mean(y)
+```
+
+Vectors such as `x` and `y` can be combined into _objects_ such as 
+`data.frame()`. Objects are subject to _introspection_.
+
+```{r objects-data.frame}
+df = data.frame(x=x, y=y)
+class(df)
+dim(df)
+length(df)
+```
+
+An object helps to
+
+- coordinate different components of the same data
+- New 'methods' available to operate on the object, e.g., `dim()`
+
+```{r methods}
+fit <- lm(y ~ x, df)
+anova(fit)
+```
+
+```{r visualize}
+plot(y ~ x, df)
+abline(fit)
+```
+
+What can I do with objects?
+
+- Discover methods, with `methods(class="lm")` or `methods("anova")`
+- `anova.lm` is an example of an "S3" method
+    - Object of class 'lm'
+    - `anova()`: generic
+    - `anova.lm()`: method
+- S3 methods can be viewed with `getAnywhere("anova.lm")` or
+  `stats:::anova.lm`
+- `?plot` provides help on the generic, but `?plot.lm` provides help
+  on the method.
+
+What is an S3 class?
+
+- just a structure with a `class` attribute
+- S3 methods are just plain-old-functions names as generic.class
+
+```{r our-class}
+obj = structure(list(), class="ourclass")
+print.ourclass = function(x, ...) {
+  cat("I'm an object of class:", class(x), "\n")
+}
+anotherobj = structure(list(), class=c("anotherclass", "ourclass"))
+```
+
+S4 classes are used in Bioconductor
+- Classes defined in packages
+- Objects created with 'constructors', e.g., `DNAStringSet()`
+- Discover methods with `methods(class="DNAStringSet")`. S4 methods are
+  presented as `generic,classA-method`, maybe with multiple classes
+- Help, e.g., `?"length,XVectorList-method"`
+- Discover class structure with `?getClass()`; `selectMethod()` is
+  useful for finding the method
+
+```{r Biostrings}
+library(Biostrings)
+dna = DNAStringSet(c("AACAT", "CTGGACA"))
+```
+
+S4 classes, generics and methods. S4 inheritance.
+
+```{r our-S4}
+.Person = setClass("Person", 
+                   representation(name="character", age="numeric"))
+
+setGeneric("name", function(object) standardGeneric("name"))
+
+setMethod("name", "Person", function(object) {
+  object@name
+})
+
+setGeneric("age", function(object) standardGeneric("age"))
+
+setMethod("age", "Person", function(object) {
+  object@age
+})
+
+setMethod("show", "Person", function(object) {
+  cat("I'm a:", class(object), "\n")
+  cat("name:", name(object), "\n")
+  cat("age:", age(object), "\n")
+})
+
+.Employee = setClass("Employee", representation(job="character"),
+                     contains="Person")
+```
+
+# Writing efficient code
+
+Three points
+- Correct more important than speed
+- Understandable more important than speed
+- Robust more important than speed
+
+```{r inefficient-to-efficient}
+## naive. quadratic -- time scales as n^2
+f1 =function(n) {
+  x = NULL
+  for (i in 1:n)
+    x = c(x, i)    # copies 1 + 2 + 3 + = n (n - 1) / 2 elements
+  x
+}
+
+## 'pre-allocate and fill', linear scaling
+f2 = function(n) {
+  x = integer(n)
+  for (i in 1:n)
+    x[i] = i
+  x
+}
+
+identical(f1(10), f2(10))
+
+## not robust!
+f1(0)
+
+f3 = function(n) {
+  x = integer(n)
+  for (i in seq_len(n))
+    x[i] = i
+  x
+}
+
+## but f3() is more complicated than it needs to be
+f4 = function(n) {
+  sapply(seq_len(n), function(i) i)
+}
+
+## but f4() is an iteration, when a simple vectorized call will do
+f5 = function(n) {
+  seq_len(n)
+}
+
+## use the microbenchmark package to calculate multiple timings
+library(microbenchmark)
+microbenchmark(f4(1000), f5(1000))
+```
+
+# Aside: environments and scope
+
+```{r bank-account}
+account = function(initial_deposit) {
+  ## every function has an _environment_. Every environment has a
+  ## parent. The parent of a function's environment is the
+  ## environment in which the function was called
+  balance <- initial_deposit
+  ## 'balance' is a symbol defined in the function's environment
+  ## with value 'initial_deposit'
+  
+  list(getbalance=function() {
+    ## this function also has an environment. It's parent is the
+    ## environment of the 'account' function
+    ## 'balance' isn't found in the environment of getbalance(), so
+    ## R looks in the parent environment
+    balance
+  }, deposit=function(amt) {
+    ## <<- says 'assign to an existing symbol in one of the 
+    ## parent environments'
+    balance <<- balance + amt
+  }, withdraw=function(amt) {
+    if (amt > balance)
+      stop("insufficient funds")
+    balance <<- balance - amt
+    amt
+  })
+}
+```
