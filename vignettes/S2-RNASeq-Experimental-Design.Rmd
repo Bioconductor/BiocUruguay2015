@@ -1,0 +1,128 @@
+---
+title: "6. Supplement 2: RNA-Seq Statistical Issues"
+author: "Martin Morgan (martin.morgan@roswellpark.org)<br />
+    Roswell Park Cancer Institute, Buffalo, NY<br />
+    5 - 9 October, 2015"
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  % \VignetteIndexEntry{6. RNA-Seq Differential Expression}
+  % \VignetteEngine{knitr::rmarkdown}
+---
+
+```{r style, echo = FALSE, results = 'asis'}
+BiocStyle::markdown()
+options(width=100, max.print=1000)
+knitr::opts_chunk$set(
+    eval=as.logical(Sys.getenv("KNITR_EVAL", "TRUE")),
+    cache=as.logical(Sys.getenv("KNITR_CACHE", "TRUE")))
+```
+
+```{r setup, echo=FALSE, messages=FALSE, warnings=FALSE}
+suppressPackageStartupMessages({
+    library(DESeq2)
+    library(limma)
+})
+```
+
+The material in this course requires R version 3.2 and Bioconductor
+version 3.2
+
+```{r configure-test}
+stopifnot(
+    getRversion() >= '3.2' && getRversion() < '3.3',
+    BiocInstaller::biocVersion() == "3.2"
+)
+```
+
+# Example: t-test
+
+`t.test()`
+
+- `x`: vector of univariate measurements
+- `y`: `factor` describing experimental design
+- `var.equal=TRUE`: appropriate for relatively small experiments where
+  no additional information available?
+- `formula`: alternative representation, `y ~ x`.
+
+```{r sleep-t.test}
+head(sleep)
+plot(extra ~ group, data = sleep)
+## Traditional interface
+with(sleep, t.test(extra[group == 1], extra[group == 2]))
+## Formula interface
+t.test(extra ~ group, sleep)
+## equal variance between groups
+t.test(extra ~ group, sleep, var.equal=TRUE)
+```
+
+`lm()` and `anova()`
+
+- `lm()`: fit _linear model_.
+- `anova()`: statisitcal evaluation.
+
+```{r sleep-lm}
+## linear model; compare to t.test(var.equal=TRUE)
+fit <- lm(extra ~ group, sleep)
+anova(fit)
+```
+
+- Under the hood: `formula`: translated into _model matrix_, used in
+  `lm.fit()`.
+- With (implicit) intercept 1, last coefficient of model matrix
+  reflects group effect
+- With intercept 0, _contrast_ between effects of coefficient 1 and
+  coefficient 2 reflect group effect 
+
+```{r sleep-model.matrix}
+## underlying model, used in `lm.fit()`
+model.matrix(extra ~ group, sleep)     # last column indicates group effect
+model.matrix(extra ~ 0 + group, sleep) # contrast between columns
+```
+
+- Covariate -- fit base model containing only covariate, test
+  improvement in fit when model includes factor of interest
+
+```{r sleep-diff}
+fit0 <- lm(extra ~ ID, sleep)
+fit1 <- lm(extra ~ ID + group, sleep)
+anova(fit0, fit1)
+t.test(extra ~ group, sleep, var.equal=TRUE, paired=TRUE)
+```
+
+`genefilter::rowttests()`
+
+- t-tests for gene expression data
+- useful for exploratory analysis, but statistically sub-optimal
+- `x`: matrix of expression values
+- features x samples (reverse of how a 'statistician' would
+  represent the data -- samples x features)
+
+- `fac`: factor of one or two levels describing experimental design
+
+Limitations
+
+- Assumes features are _independent_
+- Ignores common experimental design
+- Ignores multiple testing
+
+Consequences
+
+- Poor estimate of between-group variance for each feature
+- Elevated false discovery rate
+
+# Common experimental designs
+
+- t-test: `count ~ factor`. Alternative: `count ~ 0 + factor` and
+  contrasts
+- covariates: `count ~ covariate + factor`
+- Single factor, multiple levels (one-way ANOVA) -- statistical
+  contrasts: specify model as `count ~ factor` or `count ~ 0 + factor`
+- Factorial designs -- main effects, `count ~ factor1 + factor2`; main
+  effects and interactions, `count ~ factor1 * factor2`. Contrasts to
+  ask specific questions
+- Paired designs: include ID as covariate (approximate, since ID is a
+  random effect); `r Biocpkg("limma")` approach:
+  `duplicateCorrelation()`
