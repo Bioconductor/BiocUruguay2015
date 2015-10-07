@@ -45,6 +45,8 @@ stopifnot(
 
 # Background
 
+[Google Doc](https://docs.google.com/document/d/1di3O0mGQwLW80uVXUtdZVEitU-9Gn9hjzHV-Ae6YIcg/edit?usp=sharing)
+
 For Review:
 
 - [Overall Workflow](S1-RNASeq-Workflow.html)
