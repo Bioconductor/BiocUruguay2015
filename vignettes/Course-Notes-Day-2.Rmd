@@ -2,7 +2,13 @@
 title: "Course Notes, Day 2"
 author: "Martin Morgan"
 date: "10/6/2015"
-output: html_document
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  % \VignetteIndexEntry{Course Notes Day 2}
+  % \VignetteEngine{knitr::rmarkdown}
 ---
 
 [https://github.com/Bioconductor/BiocUruguay2015][]; click on 'vignettes' and 'V1-...'
@@ -25,7 +31,7 @@ Our own data: import phenotypic data into R from a 'tab-separate
 value' file
 
 ```{r import-phenodata}
-pdata = read.table("~/ALLphenoData.tsv")
+pdata = read.table("ALLphenoData.tsv")
 ```
 
 Explore and manipulate (mostly for practice). Watch for `NA`
@@ -41,7 +47,7 @@ pdata40plus = pdata[!is.na(pdata$age) & (pdata$age > 40),]
 Read in the assay data, and coerce to a matrix
 
 ```{r assay-data}
-assay = as.matrix(read.table("~/ALLassay.tsv", check.names=FALSE))
+assay = as.matrix(read.table("ALLassay.tsv", check.names=FALSE))
 ```
 
 Make a summarized experiment

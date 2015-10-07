@@ -179,6 +179,15 @@ Splice-aware aligners (and _Bioconductor_ wrappers)
 - [RSEM](http://www.biomedcentral.com/1471-2105/12/323) includes de
   novo assembly and quantification
 
+## (kallisto / sailfish)
+
+- 'Next generation' differential expression tools; transcriptome
+  alignment
+- E.g., [kallisto](http://pachterlab.github.io/kallisto) takes a
+  radically different approach: from FASTQ to count table without BAM
+  files.
+- Very fast, almost as accurate.
+
 # Analysis
 
 Unique statistical aspects

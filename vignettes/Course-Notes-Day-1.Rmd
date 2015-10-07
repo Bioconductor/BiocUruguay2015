@@ -2,7 +2,13 @@
 title: "Course Notes Day 1"
 author: "Martin Morgan"
 date: "10/5/2015"
-output: html_document
+output:
+  BiocStyle::html_document:
+    toc: true
+    toc_depth: 2
+vignette: >
+  % \VignetteIndexEntry{Course Notes Day 1}
+  % \VignetteEngine{knitr::rmarkdown}
 ---
 
 The following code chunks demonstrate basic R functionality. Some key points are:
