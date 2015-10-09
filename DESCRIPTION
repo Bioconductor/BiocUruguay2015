@@ -1,7 +1,7 @@
 Package: BiocUruguay2015
 Type: Package
 Title: Training Material for Uruguay R / Bioconductor Course
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: c(
     person("Martin", "Morgan", role="cre",
         email="martin.morgan@roswellpark.org"))
