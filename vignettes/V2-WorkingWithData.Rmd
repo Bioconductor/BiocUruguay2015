@@ -41,8 +41,8 @@ Your boss has been working on Acute Lymphocytic Lukemia (ALL) for many
 years. One data set consists of microarray gene expression values for
 12625 genes in 128 different samples. Your boss would like to analyze
 different subsets of the data, and has given you a couple of
-tab-delimited files. One file (_ALL-pData.tsv_) describes the samples,
-the other (_exprs.tsv_) contains pre-processed gene expression
+tab-delimited files. One file (_ALLphenoData.tsv_) describes the samples,
+the other (_ALLassay.tsv_) contains pre-processed gene expression
 data. You are supposed to come up with a way to create the subsets
 your boss asks you for. You realize that you could read the data in to
 Excel and manipulate it there, but you're concerned about being able
@@ -51,6 +51,9 @@ errors that always seem to come up. So you think you'll give
 _Bioconductor_ a try...
 
 # Read the data in to _R_
+
+Download the [ALLphenoData.tsv][] and [ALLassay.tsv][] files to the
+current workign directory, `getwd()`.
 
 ## Use `read.table()` to read _ALLphenoData.tsv_
 
@@ -193,3 +196,7 @@ Acknowledgements
 ```{r sessionInfo}
 sessionInfo()
 ```
+
+
+[ALLphenoData.tsv]: https://raw.githubusercontent.com/Bioconductor/BiocUruguay2015/master/vignettes/ALLphenoData.tsv
+[ALLassay.tsv]: https://raw.githubusercontent.com/Bioconductor/BiocUruguay2015/master/vignettes/ALLassay.tsv

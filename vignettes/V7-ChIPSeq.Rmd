@@ -333,6 +333,8 @@ the entire genome; and (2) it emphasizes comparison of ChIP patterns
 across samples, looking for _differential binding_ between treatment
 groups.
 
+Start by downloading [csaw-data.Rds][] and [csaw-normfacs.Rds][]
+
 ## 1 - 4: Experimental Design ... Alignment
 
 The experiment involves changes in binding profiles of the NFYA
@@ -543,3 +545,6 @@ Acknowledgements
 ```{r sessionInfo}
 sessionInfo()
 ```
+
+[csaw-data.Rds]: https://raw.githubusercontent.com/Bioconductor/BiocUruguay2015/master/vignettes/csaw-data.Rds
+[csaw-normfacs.Rds]: https://raw.githubusercontent.com/Bioconductor/BiocUruguay2015/master/vignettes/csaw-normfacs.Rds

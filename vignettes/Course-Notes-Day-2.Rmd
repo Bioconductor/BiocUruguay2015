@@ -25,7 +25,9 @@ hist(x)
 
 ## SummarizedExperiment / eSet
 
-A real example of the importance of reproducible research (see notes).
+A real example of the importance of reproducible research (see
+notes). Download [ALLphenoData.tsv][] and [ALLassay.tsv][] to _R_'s
+current working directory, `getwd()`.
 
 Our own data: import phenotypic data into R from a 'tab-separate
 value' file
@@ -133,3 +135,6 @@ hist(letterFrequency(promoseq, "GC", as.prob=TRUE))
 [AnnotationHub]: http://bioconductor.org/packages/AnnotationHub
 [TxDb.Hsapiens.UCSC.hg19.knownGene]: http://bioconductor.org/packages/TxDb.Hsapiens.UCSC.hg19.knownGene
 [BSgenome.Hsapiens.UCSC.hg19]: http://bioconductor.org/packages/BSgenome.Hsapiens.UCSC.hg19
+
+[ALLphenoData.tsv]: https://raw.githubusercontent.com/Bioconductor/BiocUruguay2015/master/vignettes/ALLphenoData.tsv
+[ALLassay.tsv]: https://raw.githubusercontent.com/Bioconductor/BiocUruguay2015/master/vignettes/ALLassay.tsv
