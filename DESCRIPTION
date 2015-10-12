@@ -19,6 +19,7 @@ Suggests: BiocStyle, knitr,
     MotifDb,
     Gviz, ggbio, shiny, microbenchmark,
     BSgenome.Hsapiens.UCSC.hg19, 
-    RNAseqData.HNRNPC.bam.chr14, Homo.sapiens
+    RNAseqData.HNRNPC.bam.chr14, Homo.sapiens,
+    clusterProfiler
 License: Artistic-2.0
 VignetteBuilder: knitr
