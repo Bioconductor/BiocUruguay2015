@@ -1,7 +1,7 @@
 Package: BiocUruguay2015
 Type: Package
 Title: Training Material for Uruguay R / Bioconductor Course
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
     person("Martin", "Morgan", role="cre",
         email="martin.morgan@roswellpark.org"))
@@ -17,6 +17,8 @@ Suggests: BiocStyle, knitr,
     DESeq2, limma,
     csaw, ChIPseeker,
     MotifDb,
-    Gviz, ggbio, shiny
+    Gviz, ggbio, shiny, microbenchmark,
+    BSgenome.Hsapiens.UCSC.hg19, 
+    RNAseqData.HNRNPC.bam.chr14, Homo.sapiens
 License: Artistic-2.0
 VignetteBuilder: knitr
